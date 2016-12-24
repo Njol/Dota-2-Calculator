@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -23,13 +26,28 @@ public class Main {
 	public static void main(final String[] args) throws IOException {
 		
 		System.out.println("Working...");
+
+		File steamDir = new File("C:/Games/Steam/steamapps/common/");
 		
-		names = new DotaData("dota_english.txt", StandardCharsets.UTF_16LE).getSection("Tokens");
+		File dotaDir = new File(steamDir, "./dota 2 beta/");
 		
-		itemsData = new DotaData("items.txt", StandardCharsets.UTF_8).getSection("DOTAAbilities");
-		heroesData = new DotaData("npc_heroes.txt", StandardCharsets.UTF_8).getSection("DOTAHeroes");
-		abilitiesData = new DotaData("npc_abilities.txt", StandardCharsets.UTF_8).getSection("DOTAAbilities");
-		unitsData = new DotaData("npc_units.txt", StandardCharsets.UTF_8).getSection("DOTAUnits");
+		File vpkExe = new File(steamDir, "./Team Fortress 2/bin/vpk.exe");
+		File extractedDir = new File("./scripts/npc/");
+		extractedDir.mkdirs(); // required for vpk to work
+		try {
+			System.out.println(String.join("\" \"", Arrays.asList(vpkExe.getAbsolutePath(), "x", new File(dotaDir, "./game/dota/pak01_dir.vpk").getAbsolutePath(), "scripts/npc/items.txt", "scripts/npc/common_items.txt")));
+			new ProcessBuilder(vpkExe.getAbsolutePath(), "x", new File(dotaDir, "./game/dota/pak01_dir.vpk").getAbsolutePath(), "scripts/npc/items.txt").start().waitFor();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		names = new DotaData(new File(dotaDir, "./game/dota/resource/dota_english.txt"), StandardCharsets.UTF_16LE).getSection("Tokens");
+		
+		itemsData = new DotaData(new File("./scripts/npc/items.txt"), StandardCharsets.UTF_8).getSection("DOTAAbilities");
+		heroesData = new DotaData(new File(dotaDir, "./game/dota/scripts/npc/npc_heroes.txt"), StandardCharsets.UTF_8).getSection("DOTAHeroes");
+		abilitiesData = new DotaData(new File(dotaDir, "./game/dota/scripts/npc/npc_abilities.txt"), StandardCharsets.UTF_8).getSection("DOTAAbilities");
+		unitsData = new DotaData(new File(dotaDir, "./game/dota/scripts/npc/npc_units.txt"), StandardCharsets.UTF_8).getSection("DOTAUnits");
 		
 		Abilities.execute(); // fills Abilities.abilityAttributes
 		Items.execute();

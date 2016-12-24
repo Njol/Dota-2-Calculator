@@ -27,10 +27,10 @@ public final class DotaData {
 	
 	private DotaData() {}
 	
-	public DotaData(final String filename, final Charset charset) throws IOException {
+	public DotaData(final File file, final Charset charset) throws IOException {
 		final Deque<DotaData> currentSections = new ArrayDeque<>();
 		currentSections.addLast(this);
-		try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filename)), charset))) {
+		try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))) {
 			String line;
 			while ((line = r.readLine()) != null) {
 				Matcher m = LINE.matcher(line);

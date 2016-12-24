@@ -1,1 +1,0 @@
-../../../../../Games/Steam/steamapps/common/dota 2 beta/game/dota/scripts/npc/npc_heroes.txt
