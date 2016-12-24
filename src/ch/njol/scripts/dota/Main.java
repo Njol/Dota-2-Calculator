@@ -19,7 +19,7 @@ import org.json.JSONObject;
 
 public class Main {
 	
-	public final static File outputDir = new File("../njol.ch v2.0/dota2/");
+	public final static File outputDir = new File("./web/");
 	
 	public static DotaData names, itemsData, heroesData, abilitiesData, unitsData;
 	
@@ -35,7 +35,6 @@ public class Main {
 		File extractedDir = new File("./scripts/npc/");
 		extractedDir.mkdirs(); // required for vpk to work
 		try {
-			System.out.println(String.join("\" \"", Arrays.asList(vpkExe.getAbsolutePath(), "x", new File(dotaDir, "./game/dota/pak01_dir.vpk").getAbsolutePath(), "scripts/npc/items.txt", "scripts/npc/common_items.txt")));
 			new ProcessBuilder(vpkExe.getAbsolutePath(), "x", new File(dotaDir, "./game/dota/pak01_dir.vpk").getAbsolutePath(), "scripts/npc/items.txt").start().waitFor();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -53,7 +52,7 @@ public class Main {
 		Items.execute();
 		Heroes.execute();
 		
-		Attribute.writeJS("Env", new File(outputDir, "Env.js"));
+		Attribute.writeJS("Env", new File(outputDir, "./Env.js"));
 		
 		System.out.println("Done!");
 		
