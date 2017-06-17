@@ -335,7 +335,7 @@ function setup_combined_env() {
 	var itemsCombined = "";
 	var i = 0;
 	for ( var c in combined_env) {
-		itemsCombined += "<label title='" + (combined_env[c].desc || "") + "'>" + combined_env[c].name + ":<input type='text' value='" + combined_env[c].value
+		itemsCombined += "<label title='" + (combined_env[c].desc || "") + "'>" + combined_env[c].name + ":<input type='number' value='" + combined_env[c].value
 				+ "' onchange='update_combined(\"" + escape(c) + "\", this.value)'/></label>";
 		i++;
 	}
@@ -662,7 +662,7 @@ function update() {
 			var ability = abilities[ability_id];
 			abiltiesTable += "<tr><th class='image' style='background-image: url(" + ability_icon(ability_id) + ")'>" // <input type='checkbox' onchange='toggle_ability(\"" + escape(ability_id) + "\")' " + (true ? "checked='checked' " : "") + "/>
 					+ ability.name + "</th>" + "<td><input type='number' min='0' max='" + ability.level_max + "' step='1' value='" + ability.level
-					+ "' onchange='set_ability_option(\"" + escape(ability_id) + "\", \"level\", +this.value)' style='width: 100px;' /></td>";
+					+ "' onchange='set_ability_option(\"" + escape(ability_id) + "\", \"level\", +this.value)' style='width: 40px;' /></td>";
 			var max_stacks = Math.max(ability.stacks_max, ability.levels[ability.level].stacks_max || 0);
 			if (max_stacks > 0) {
 				abiltiesTable += "<td>" + ability.stacks_name + ":</td><td><input type='number' min='0' max='" + max_stacks + "' step='1' value='" + ability.stacks
@@ -687,15 +687,19 @@ function update() {
 	document.getElementById("inventory").getElementsByTagName("tbody")[0].innerHTML = invi;
 	
 	// Items table
-	var percent_width = 100;
-	var header = "<tr><th></th><th style='width: " + percent_width + "px; padding: 0px;'>%</th><th onclick='sort(\"name\")' style='cursor: pointer'>Item " + (currentSort == "name" ? sortNatural ? "↓" : "↑" : "↕") + "</th>";
+	var percent_width = 70;
+	var header = '';
 	for ( var stat in items_table) {
 		if (!items_table[stat].enabled)
 			continue;
-		header += "<th onclick='sort(\"" + escape(stat) + "\")' style='padding: 2px 5px; cursor: pointer' title='" + (items_table[stat].desc || "") + "'>" + stat + " "
+		header += "<th onclick='sort(\"" + escape(stat) + "\")' style='padding: 2px 5px; cursor: pointer' title='" + (items_table[stat].desc || "") + "'>" + stat + "&nbsp;"
 				+ (currentSort == stat ? sortNatural ? "↑" : "↓" : "↕") + "</th>";
 	}
-	document.getElementById("items").getElementsByTagName("thead")[0].innerHTML = header + "</tr>";
+	var items_header_top = document.getElementById("dota2_items_header_top").getElementsByTagName("thead")[0];
+	items_header_top.innerHTML = "<tr>" + header + "</tr>";
+	
+	var items_header_topleft = document.getElementById("dota2_items_header_topleft").getElementsByTagName("thead")[0];
+	items_header_topleft.innerHTML = "<tr><th style='min-width: 20px;'></th><th style='min-width: " + percent_width + "px; padding: 0px;'>%</th><th onclick='sort(\"name\")' style='cursor: pointer; min-width: 200px;'>Item&nbsp;" + (currentSort == "name" ? sortNatural ? "↓" : "↑" : "↕") + "</th></tr>";
 	
 	var tableItems = [];
 	var maxs = {};
@@ -741,28 +745,58 @@ function update() {
 	}
 	tableItems.sort(sorting_function);
 	
-	var red = 0xd7, blue = 0x5a, green = 0x28;
+	// css orange: FF7E00
+	var left_header = '';
 	var body = "";
 	for (var i = 0; i < tableItems.length; i++) {
 		var item = tableItems[i];
 		var percent = currentSort == "name" ? "" : (100 * item[currentSort] / maxs[currentSort]).toFixed(1);
 		// alternative to box-shadow: "<div style="position: absolute; width: "+percent+"%; right: 0px; height: 100%; top: 0px; background: rgb(" + red + "," + blue + "," + green + "); z-index: -1;"></div>"
 		// requires <tr style="position: relative;">
-		body += "<tr><td onclick='add_item(\"" + escape(item.id) + "\")' style='cursor: pointer'><b>+</b></td><td style='box-shadow: inset -" + percent / 100 * percent_width
-				+ "px 0px rgb(" + red + "," + blue + "," + green + ");'>" + percent + "</td><td style='text-align: left;"
-				+ (options.show_images ? "background: url(" + item_icon(item.base_id) + ") no-repeat 4px center/28px auto; padding-left: 36px;" : "") + "'>" + item.name + "</td>";
+		left_header += "<tr><td onclick='add_item(\"" + escape(item.id) + "\")' style='cursor: pointer; min-width: 20px; text-align: center;'><b>+</b></td><td style='text-align: right; box-shadow: inset -" + (percent / 100 * percent_width)
+				+ "px 0px #FF7E00; min-width: "+percent_width+"px'>" + percent + "</td><td style='max-width: 200px;"
+				+ (options.show_images ? "background: url(" + item_icon(item.base_id) + ") no-repeat 4px center/28px auto; padding-left: 36px;" : "") + "'>" + item.name + "</td></tr>";
+		body += '<tr>';
 		for ( var stat in items_table) {
 			if (!items_table[stat].enabled)
 				continue;
-			var r = function(x) {
-				return (255 - (255 - x) * item[stat] / maxs[stat]).toFixed(0);
-			};
-			body += "<td style='background-color: rgb(" + r(red) + "," + r(blue) + "," + r(green) + ")'>" + toString(item[stat]) + "</td>";
+			body += "<td style='background-color: rgba(255,126,0," + (item[stat] / maxs[stat]) + ");'>" + toString(item[stat]) + "</td>";
 		}
 		body += "</tr>";
 	}
-	document.getElementById("items").getElementsByTagName("tbody")[0].innerHTML = body;
+	var items_header_left = document.getElementById("dota2_items_header_left").getElementsByTagName("tbody")[0];
+	items_header_left.innerHTML = left_header;
+	var items_body = document.getElementById("dota2_items_body").getElementsByTagName("tbody")[0]
+	var items_body_container = document.getElementById("dota2_items_body").parentNode;
+	var scrollLeft = items_body_container.scrollLeft, scrollTop = items_body_container.scrollTop;
+	items_body.innerHTML = body;
 	
+
+	var header_tds = items_header_top.children[0].children;
+	var body_firstrow_tds = items_body.children[0].children;
+	for (var i = 0; i < header_tds.length; i++) {
+		var head_td = header_tds[i], body_td = body_firstrow_tds[i];
+		var width = Math.max(head_td.offsetWidth, body_td.offsetWidth);
+		head_td.style.minWidth = width+'px';
+		body_td.style.minWidth = width+'px';
+	}
+	
+	items_header_topleft.children[0].children[0].style.height = header_tds[0].offsetHeight+'px';
+	
+	var header_trs = items_header_left.children;
+	var body_trs = items_body.children;
+	for (var i = 0; i < header_trs.length; i++) {
+		var head_tr = header_trs[i], body_tr = body_trs[i];
+		var height = Math.max(head_tr.offsetHeight, body_tr.offsetHeight);
+		if (height > 44) { // as defined in the CSS -- the script runs noticeably faster with fewer changes here
+			head_tr.style.height = height+'px';
+			body_tr.style.height = height+'px';
+		}
+	}
+
+	items_body_container.scrollLeft = scrollLeft;
+	items_body_container.scrollTop = scrollTop;
+	items_body_container.onscroll();
 }
 
 // hero builds
@@ -893,7 +927,7 @@ function update_hero_builds() {
 		var build = hero_builds[i];
 		html += "<tr><td><img src='" + hero_icon(build.options.hero) + "' height='20' style='vertical-align: text-top;' /> " + heroes[build.options.hero].name + "</td><td"
 				+ (build.id == current_hero_build_id ? " style='font-weight: bold;'" : "") + ">" + build.name + "</td><td><button onclick='load_hero_build(\"" + build.id
-				+ "\")'>Load</button></td><td><button onclick='delete_hero_build(\"" + build.id + "\")'>Delete</button></td></tr>";
+				+ "\")' class='btn btn-default btn-xs'>Load</button></td><td><button onclick='delete_hero_build(\"" + build.id + "\")' class='btn btn-default btn-xs'>Delete</button></td></tr>";
 	}
 	if (html == "") {
 		html = "<tr><td colspan='4'>You don't have any saved hero builds.</td></tr>";

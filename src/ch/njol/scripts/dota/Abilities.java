@@ -20,6 +20,7 @@ public class Abilities {
 	
 	private final static Map<String, Map<String, String>> abilityAttributes = new HashMap<>();
 	
+	@SuppressWarnings("null")
 	public final static double getAbilityAttribute(final String ability, final String attibute, final int level) {
 		return getLevelled(abilityAttributes.get(ability).get(attibute), level);
 	}
@@ -388,6 +389,7 @@ public class Abilities {
 		}
 	};
 	
+	@SuppressWarnings("null")
 	private final static void handleAbility(final String id, final JSONObject abilities, final JSONObject baseAbility, final JSONObject levelData, final Map<String, Double> attrs, //
 	/*		*/ final double damage, final double duration, final int level, final double cooldown, final double manacost) {
 		

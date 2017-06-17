@@ -4,5 +4,5 @@
 /**
  * @author Peter Güttinger
  */
-@org.eclipse.jdt.annotation.NonNullByDefault(false)
+@org.eclipse.jdt.annotation.NonNullByDefault({})
 package ch.njol.scripts.dota;

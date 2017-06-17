@@ -332,6 +332,7 @@ public class Items {
 		}
 	};
 	
+	@SuppressWarnings("null")
 	private final static void handleItem(final String id, final JSONObject items, final JSONObject item, final Map<String, Double> attrs) {
 		
 		// "all stats" pseudo-attribute
